@@ -1,0 +1,373 @@
+CREATE TABLE uims."course"
+(
+    "cid" serial NOT NULL,
+    "cname" character varying(15) COLLATE pg_catalog."default",
+    "duration" numeric,
+    CONSTRAINT "COURSE_pkey" PRIMARY KEY ("cid")
+)
+
+
+CREATE TABLE uims."field"
+(
+    "fid" serial NOT NULL,
+    "fname" character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT "field_pkey" PRIMARY KEY ("fid")
+)
+
+
+
+CREATE TABLE uims."recruiter"
+(
+    "rid" serial NOT NULL,
+	"rname" character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    "username" character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    "password" character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    "city" character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    "address" character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    "email" character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    "mobile_no" character varying(30) COLLATE pg_catalog."default",
+    CONSTRAINT "rid" PRIMARY KEY ("rid"),
+	CONSTRAINT "mobile_no" UNIQUE ("mobile_no"),
+	CONSTRAINT "email" UNIQUE ("email"),
+    CONSTRAINT "mobile_no_length" CHECK (length("mobile_no"::text) = 10)
+)
+
+
+
+CREATE TABLE uims."works"
+(
+    "wid" integer NOT NULL,
+    "rid" integer NOT NULL,
+    "fid" integer NOT NULL,
+    CONSTRAINT "wid" PRIMARY KEY ("wid", "rid", "fid"),
+    CONSTRAINT "fid" FOREIGN KEY ("fid")
+        REFERENCES uims."field" ("fid") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT "rid" FOREIGN KEY ("rid")
+        REFERENCES uims."recruiter" ("rid") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+
+
+CREATE TABLE uims.student
+(
+    sid integer NOT NULL,
+    fname character varying(40) COLLATE pg_catalog."default" NOT NULL,
+    lname character varying(40) COLLATE pg_catalog."default" NOT NULL,
+    cid integer NOT NULL,
+    username character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    password character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    year integer NOT NULL,
+    address character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    city character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    email character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    mobile_no character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT student_pkey PRIMARY KEY (sid),
+    CONSTRAINT email_unique UNIQUE (email),
+    CONSTRAINT mobile_no_unique UNIQUE (mobile_no),
+    CONSTRAINT username UNIQUE (username),
+    CONSTRAINT mobile_no CHECK (length(mobile_no::text) = 10)
+)
+
+
+CREATE TABLE uims."project"
+(
+    "pid" serial NOT NULL,
+    "sid" serial NOT NULL,
+    "title" character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    "duration" integer,
+    "guide" character varying(30) COLLATE pg_catalog."default",
+    CONSTRAINT "fk" PRIMARY KEY ("pid", "sid", "title"),
+    CONSTRAINT "sid" FOREIGN KEY ("sid")
+        REFERENCES uims."student" ("sid") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+
+CREATE TABLE uims.application
+(
+    apid integer NOT NULL DEFAULT nextval('uims.application_apid_seq'::regclass),
+    sid integer,
+    link character varying COLLATE pg_catalog."default",
+    CONSTRAINT apid PRIMARY KEY (apid),
+    CONSTRAINT application_sid_key UNIQUE (sid),
+    CONSTRAINT sid FOREIGN KEY (sid)
+        REFERENCES uims.student (sid) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+
+
+
+CREATE TABLE uims."recruitements"
+(
+    "rid" serial NOT NULL,
+    "sid" serial NOT NULL,
+    "date" date NOT NULL,
+    "duration" numeric NOT NULL,
+    "stipend" numeric,
+    CONSTRAINT recruted_id PRIMARY KEY ("rid", "sid"),
+    CONSTRAINT "recruitments_sid" UNIQUE ("sid"),
+    CONSTRAINT "rid" FOREIGN KEY ("rid")
+        REFERENCES uims."recruiter" ("rid") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT "sid" FOREIGN KEY ("sid")
+        REFERENCES uims."student" ("sid") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+
+
+insert into uims.course values (1,'bca',3);
+insert into uims.course values (2,'mca',3);
+insert into uims.course values (3,'msc(it)',2);
+insert into uims.course values (4,'mdes',1);
+insert into uims.course values (5,'bsc(it)',1);
+insert into uims.course values (6,'btech(ict)',4);
+insert into uims.course values (7,'btech(cs)',4);
+insert into uims.course values (8,'mtech',2);
+
+
+insert into uims.field values (1,'database');
+insert into uims.field values (2,'web designing');
+insert into uims.field values (3,'web application development');
+insert into uims.field values (4,'software engineering');
+insert into uims.field values (5,'application development');
+insert into uims.field values (6,'mobile application development');
+insert into uims.field values (7,'graphics designing');
+insert into uims.field values (8,'networking');
+insert into uims.field values (9,'testing');
+
+
+
+
+insert into uims.recruiter values(1,'google','google','google123','mumbai','Maker Maxity, 3 North Avenue, Mumbai, Maharashtra 400051','google@google.com',9844709503);
+insert into uims.recruiter values(2,'microsoft','microsoft','microsoft123','mumbai','4th Floor, Windsor, Off CST Road, Kalina, Santacruz East, Mumbai, Maharashtra 400098','microsoft@microsoft.com',22);
+insert into uims.recruiter values(3,'sprinkle','sprinkle','sprinkle123','kolkata','D62, Ramgarh, Naktala, Naktala, Kolkata, West Bengal 700047','sprinkle@sprinkle.com',22);
+insert into uims.recruiter values(3,'oracle','oracle','oracle123','ahmedabad',' B 2nd Floor, Shroff Chamber, Opposite Navchetan School, Paldi, Paldi, Ahmedabad, Gujarat 380007','oracle@oracle.com',22);
+insert into uims.recruiter values(4,'opshub','opshub','opshub123','ahmedabad', 9, Ankur Rd, Parshwanath Society, Sundar Nagar, Naranpura, Ahmedabad, Gujarat 380013','opshub@opshub.com',22);
+insert into uims.recruiter values(5,'amazon','amazon','amazon123','hyderabad','Jairaj Orange Towers, Sy No: 116 & 117, Road No: 02, Financial District, Nanakram Guda, Hyderabad, Telangana 500032','amazon@amazon.com',22);
+insert into uims.recruiter values(6,'facebook','facebook','facebook23','hyderabad',Building No. 20, Raheja Mindspace, K.Raheja I.T. Park, Hitech City Road, Vittal Rao Nagar, HITEC City, Hyderabad, Telangana 500081','facebook@facebook.com',22);
+insert into uims.recruiter values(7,'linkdin','linkdin','linkdin123','bangaluru',' 7th floor,Tower A, Global Technology Park, Devarabisanahalli, Next to Intel, Adarsh Palm Retreat, Bengaluru, Karnataka 560103','linkdin@linkdin.com',22);
+insert into uims.recruiter values(8,'flipkart','flipkart','flipkart123','coimbatore',' 1/148, Avinashi Rd, NPS Nagar, Neelambur, Coimbatore, Avinashi Rd, NPS Nagar, Neelambur, Coimbatore, Tamil Nadu 641062','flipkart@flipkart.com',22);
+insert into uims.recruiter values(9,'paytm','paytm','paytm123','bangaluru','No.144/533, 2nd floor, 22nd main, 150 Feet Ring Road, HSR Layout 1st Sector, Agara, Bengaluru, Karnataka 560102','paytm@paytm.com',22);
+
+
+
+
+
+
+insert into uims.student values(2,'arpit','holkar',1,'arpitholkar','arpitholkar123',2015,'53, Gunjan Villas, Charlie Nagar, Delhi - 364044','delhi','20151002@daiict.ac.in','9844776100');
+insert into uims.student values(3,'aryabhatta','patel',1,'aryabhattapatel','aryabhattapatel123',2016,'49, Abhinav Apartments, SavitaGarh, Ahmedabad - 555916','Ahmedabad','20161001@daiict.ac.in','9844735693');
+insert into uims.student values(4,'ujali','bhavalakar',1,'ujalibhavalakar','ujalibhavalakar123',2016,'99, Heer Apartments, Vikhroli, Mumbai - 178155','Mumbai','20161002@daiict.ac.in','8866375060');
+insert into uims.student values(5,'lavanya','kapudia',1,'lavanyakapudia','lavanyakapudia123',2015,'96, Hassan Society, Harmada, Delhi - 317476','delhi','20151003@daiict.ac.in','7600027929');
+
+insert into uims.student values(6,'ashtavakra','achaval',2,'ashtavakraachaval','ashtavakraachaval123',2015,'80, Neela Villas, Malad, Ahmedabad - 440607','ahmedabad','20152001@daiict.ac.in','8866338614');
+insert into uims.student values(7,'narendra','sinha',2,'narendrasinha','narendrasinha123',2016,'48, Julie Heights, JohnGunj, Guwahati - 494202','Guwahati','20162001@daiict.ac.in','9564505953');
+insert into uims.student values(8,'madhavacharta','chipalunakar',2,'madhavachartachipalunakar','madhavachartachipalunakar123',2016,'85, Urvashi Villas, NandiniPur, Jabalpur - 420141','Jabalpur','20162002@daiict.ac.in','8866330812');
+insert into uims.student values(9,'krishna','mirchandani',2,'krishnamirchandani','krishnamirchandani123',2015,'96, Rajesh Villas, VivekPur, Ajmer - 449615','Ajmer','20152002@daiict.ac.in','9564534573');
+
+insert into uims.student values(10,'aditya','malviya',3,'adityamalviya','adityamalviya123',2015,'33, Narmada Apartments, Nancy Chowk, Mumbai - 476834','mumbai','20153001@daiict.ac.in','8866349083');
+insert into uims.student values(11,'vayu','mallaya',3,'vayumallaya','vayumallaya123',2016,'13, Isha Apartments, Hinjewadi, Jamnagar - 580576','Jamnagar','20163001@daiict.ac.in','9564564601');
+insert into uims.student values(12,'dyal','mehrotra',3,'dyalmehrotra','dyalmehrotra123',2016,'68, Shweta Heights, AlpaGarh, Delhi - 268788','delhi','20163002@daiict.ac.in','9638339464');
+insert into uims.student values(13,'daksha','vadekar',3,'dakshavadekar','dakshavadekar123',2015,'43, Ricky Society, Deccan Gymkhana, Mumbai - 344260','mumbai','20153002@daiict.ac.in','9564520066');
+
+insert into uims.student values(14,'dharya','bajpai',4,'dharyabajpai','dharyabajpai123',2015,'26, Deep Apartments, Sodala, Nashik - 570867','Nashik','20154001@daiict.ac.in','7600286921');
+insert into uims.student values(15,'usha','gaur',4,'ushagaur','ushagaur123',2016,'85, Madhu Society, AfreenGarh, Delhi - 423181','delhi','20164001@daiict.ac.in','9844769601');
+insert into uims.student values(16,'archita','sardar',4,'architasardar','architasardar123',2016,'21, Kamini Apartments, KasturbaGunj, Guwahati - 385621','Guwahati','20164002@daiict.ac.in','9564502108');
+insert into uims.student values(17,'nehal','patvardhan',4,'nehalpatvardhan','nehalpatvardhan123',2015,'28, Peter Heights, Marathahalli, Jammu - 258328','Jammu','20154002@daiict.ac.in','9844708457');
+
+insert into uims.student values(18,'amitodana','choraghad',5,'amitodanachoraghad','amitodanachoraghad123',2015,'56, Deep Apartments, Yeshwanthpura, Kochi - 262193','Kochi','20155001@daiict.ac.in','9638379075');
+insert into uims.student values(19,'jatayu','dhebar',5,'jatayudhebar','jatayudhebar123',2016,'92, Sneha Apartments, Yeshwanthpura, Kochi - 250724','Kochi','20165001@daiict.ac.in','9844766402');
+insert into uims.student values(20,'vayu','heravdakar',5,'vayuheravdakar','vayuheravdakar123',2016,'75, Albert Heights, Dadar, Mysore - 459351','Mysore','20165002@daiict.ac.in','9638371036');
+insert into uims.student values(21,'kasturbai','dheer',5,'kasturbaidheer','kasturbaidheer123',2015,'46, Julie Apartments, BinoyaPur, Mumbai - 344347','Mumbai','20155002@daiict.ac.in','9564560893');
+
+insert into uims.student values(22,'saurandhri','dhavale',6,'saurandhridhavale','saurandhridhavale123',2015,'49, Jasmin Villas, Andheri, Delhi - 466898','Delhi','20156001@daiict.ac.in','7600244110');
+insert into uims.student values(23,'uma','navathe',6,'umanavathe','umanavathe123',2016,'71, Gowri Heights, Model Town, Gurgaon - 393221','Gurgaon','20166001@daiict.ac.in','9638353599');
+insert into uims.student values(24,'bana','bagchi',6,'banabagchi','banabagchi123',2016,'49, Atul Society, Sodala, Ahmedabad - 155978','Ahmedabad','20166002@daiict.ac.in','7600581595');
+insert into uims.student values(25,'vinay','bajpeyi',6,'vinaybajpeyi','vinaybajpeyi123',2015,'46, Sukriti Society, HeenaGarh, Mumbai - 547372','Mumbai','20156002@daiict.ac.in','9844740376');
+
+insert into uims.student values(26,'purshottama','sardar',7,'purshottamasardar','purshottamasardar123',2015,'26, John Society, Kharadi, Bengaluru - 312178','Bengaluru','20157001@daiict.ac.in','8866345601');
+insert into uims.student values(27,'rajendra','mandalik',7,'rajendramandalik','rajendramandalik123',2016,'28, Urmi Apartments, Labeen Nagar, delhi - 473085','delhi','20167001@daiict.ac.in','9564510183');
+insert into uims.student values(28,'bhairavi','choraghad',7,'bhairavichoraghad','bhairavichoraghad123',2016,'86, Ibrahim Apartments, Bandra, Jamnagar - 434749','Jamnagar','20167002@daiict.ac.in','7600785900');
+insert into uims.student values(29,'sharya','malviya',7,'sharyamalviya','sharyamalviya123',2015,'19, Eddie Heights, Mitesh Chowk, Ahmedabad - 563881','Ahmedabad','20157002@daiict.ac.in','8866395789');
+
+insert into uims.student values(30,'saanvi','bhattacharya',8,'saanvibhattacharya','saanvibhattacharya123',2015,'35, Usha Apartments, Nawab, Nagar, Ludhiana - 230435','Ludhiana','20158001@daiict.ac.in','9844724071');
+insert into uims.student values(31,'aditi','barvadekar',8,'aditibarvadekar','aditibarvadekar123',2016,'94, Narayan Apartments, VickyPur, Bhubhaneshwar - 261808','Bhubhaneshwar','20168001@daiict.ac.in','8866350639');
+insert into uims.student values(32,'kavuri','upadhyay',8,'kavuriupadhyay','kavuriupadhyay123',2016,'67, Jamshed Apartments, VijayentGarh, Ahmedabad - 320431','Ahmedabad','20168002@daiict.ac.in','9638379760');
+insert into uims.student values(33,'minu','bhardvaj',8,'minubhardvaj','minubhardvaj123',2015,'43, Roma Society, Deccan Gymkhana, Patna - 599537','Patna','20158002@daiict.ac.in','9844754008');
+
+insert into uims.student values(34,'sharad','divakar',1,'sharaddivakar','sharaddivakar123',2015,'54, Manpreet Apartments, Sodala, Ahmedabad - 408341','Ahmedabad','20151004@daiict.ac.in','9638366995');
+
+insert into uims.student values(35,'sambridhi','randhawa',2,'sambridhirandhawa','sambridhirandhawa123',2016,'26, Amolika Heights, Malad, Kochi - 394570','Kochi','20162003@daiict.ac.in','7600322624');
+
+insert into uims.student values(36,'aditi','gharapure',3,'aditigharapure','aditigharapure123',2016,'13, Mohan Apartments, BhairaviGunj, Jammu - 236367','Jammu','20163003@daiict.ac.in','9638353732');
+
+insert into uims.student values(37,'ramesh','taurani',4,'rameshtaurani','rameshtaurani123',2015,'30, Bimla Society, Churchgate, Mysore - 128597','Mysore','20154003@daiict.ac.in','8866386946');
+
+insert into uims.student values(38,'kirit','solanki',5,'kiritsolanki','kiritsolanki123',2015,'86, Sona Apartments, Kharadi, Ahmedabad - 445937','Ahmedabad','20155003@daiict.ac.in','9844769568');
+
+insert into uims.student values(39,'rajesh','talwar',6,'rajeshtalwar','rajeshtalwar123',2016,'12, Jaswant Villas, Marlo Nagar, Thiruvananthapuram - 548840','Thiruvananthapuram','20166003@daiict.ac.in','9638364217');
+
+
+
+
+
+
+
+
+
+
+insert into uims.project values(2,2,'University examination management system',4,'Prabhu Kumar');
+insert into uims.project values(3,3,'Banking account system for clients',3,'Nikhil Das');
+insert into uims.project values(4,4,'Automotive factory inventory system',3,'Rajendra Narang');
+insert into uims.project values(5,5,'Real estate broker system',4,'Lochan Joshi');
+insert into uims.project values(6,6,'Hostel management system',2,'Arti Nibhanupudi');
+insert into uims.project values(7,7,'University course management system',4,'Avanti Gadhavi');
+insert into uims.project values(8,8,'Court case management system',3,'Jai Rao');
+insert into uims.project values(9,9,'RTO Driver license management system',2,'Indra Chaudhary');
+insert into uims.project values(10,10,'Book publication and inventory system',2,'Suman Jain');
+insert into uims.project values(11,11,'Veternary hospital management system',4,'Sudhir Gadhavi');
+insert into uims.project values(12,12,'Dairy projct management system',3,'Vimal Jain');
+insert into uims.project values(13,13,'Investment management system',4,'Bhaskar Nagarkar');
+insert into uims.project values(14,14,'Frenchise management system',2,'Hari Tamboli');
+insert into uims.project values(15,15,'Population demography system for social media',3,'Swati Misra');
+insert into uims.project values(16,16,'Electricity grid mangement system',4,'Priyen Soni');
+insert into uims.project values(17,17,'Animal Species repository system',3,'Divya Shah');
+insert into uims.project values(18,18,'Preschool management system',3,'Nadendra Solanki');
+insert into uims.project values(19,19,'Property management system for builder',3,'Harpreet Singh');
+insert into uims.project values(20,20,'Income tax department management system',2,'Bimal Roy');
+insert into uims.project values(21,21,'Municipal property tax management system',4,'Ajay Thakur');
+insert into uims.project values(22,22,'Telecom billing system',4,'Anand Kumar');
+insert into uims.project values(23,23,'Software bugs tracking system',4,'Avilasha Ghosh');
+insert into uims.project values(24,24,'Courier shipping management system',4,'Asutosh Govadkar');
+insert into uims.project values(25,25,'Alumni management system',2,'Raj Kapoor');
+insert into uims.project values(26,26,'Board level examination management system',2,'Varun Dhawan');
+insert into uims.project values(27,27,'Air Travel agency customer management system',4,'Sidharth Malhotra');
+insert into uims.project values(28,28,'Passport office system',3,'Kishor Kumar');
+insert into uims.project values(29,29,'Voting management system',2,'Rajesh Khanna');
+insert into uims.project values(30,30,'Research papers, Journal and articles management system',3,'Vishal Sinha');
+insert into uims.project values(31,31,'India Census management system',2,'Asha Bhosle');
+insert into uims.project values(32,32,'Water supply management system',3,'Aamir Khan');
+insert into uims.project values(33,33,'Newpaper and magazines sales mangement system',4,'Kumar Sanu');
+insert into uims.project values(34,34,'Medical Disease, treatment and drug Management system',4,'Alka Yagnik');
+insert into uims.project values(35,35,'University lab management system',2,'Suhash Tandon');
+insert into uims.project values(36,36,'Event management system',2,'Raju Hirani');
+insert into uims.project values(37,37,'Government Tender management system',2,'Divyanka Tripathi');
+insert into uims.project values(38,38,'Club membership management system',3,'Rahul Khanna');
+insert into uims.project values(39,39,'Cricket match schedule management system',4,'Vikram Kumar');
+
+
+
+
+
+
+
+
+
+
+insert into uims.works values(2,1,1);
+insert into uims.works values(3,1,2);
+insert into uims.works values(4,1,3);
+insert into uims.works values(5,1,4);
+insert into uims.works values(6,1,5);
+insert into uims.works values(7,1,6);
+insert into uims.works values(8,1,7);
+insert into uims.works values(9,1,8);
+insert into uims.works values(10,1,9);
+insert into uims.works values(11,2,1);
+insert into uims.works values(12,2,2);
+insert into uims.works values(13,2,3);
+insert into uims.works values(14,2,4);
+insert into uims.works values(15,2,5);
+insert into uims.works values(16,2,6);
+insert into uims.works values(17,2,7);
+insert into uims.works values(18,2,8);
+insert into uims.works values(19,2,9);
+insert into uims.works values(20,3,1);
+insert into uims.works values(21,3,2);
+insert into uims.works values(22,3,3);
+insert into uims.works values(23,3,4);
+insert into uims.works values(24,3,5);
+insert into uims.works values(25,3,6);
+insert into uims.works values(26,3,7);
+insert into uims.works values(27,4,1);
+insert into uims.works values(28,4,2);
+insert into uims.works values(29,4,3);
+insert into uims.works values(30,4,4);
+insert into uims.works values(31,4,5);
+insert into uims.works values(32,4,6);
+insert into uims.works values(33,4,9);
+insert into uims.works values(34,5,2);
+insert into uims.works values(35,5,3);
+insert into uims.works values(36,5,5);
+insert into uims.works values(37,5,6);
+insert into uims.works values(38,5,8);
+insert into uims.works values(39,5,9);
+insert into uims.works values(40,6,1);
+insert into uims.works values(41,6,2);
+insert into uims.works values(42,6,3);
+insert into uims.works values(43,6,5);
+insert into uims.works values(44,6,6);
+insert into uims.works values(45,6,9);
+insert into uims.works values(46,6,7);
+insert into uims.works values(47,6,8);
+insert into uims.works values(48,6,4);
+insert into uims.works values(49,7,1);
+insert into uims.works values(50,7,2);
+insert into uims.works values(51,7,4);
+insert into uims.works values(52,7,5);
+insert into uims.works values(53,7,6);
+insert into uims.works values(54,7,9);
+insert into uims.works values(55,8,2);
+insert into uims.works values(56,8,3);
+insert into uims.works values(57,8,5);
+insert into uims.works values(58,8,6);
+insert into uims.works values(59,8,7);
+insert into uims.works values(60,8,9);
+insert into uims.works values(61,9,1);
+insert into uims.works values(62,9,2);
+insert into uims.works values(63,9,3);
+insert into uims.works values(64,9,4);
+insert into uims.works values(65,9,5);
+insert into uims.works values(66,9,6);
+insert into uims.works values(67,9,7);
+insert into uims.works values(68,9,8);
+insert into uims.works values(69,9,9);
+
+
+insert into uims.application (sid,link) values (1,'http://instaresume.kunalvarma.in/nutanpandya_resume');
+insert into uims.application (sid,link) values (10,'http://instaresume.kunalvarma.in/adityamalviya_resume');
+insert into uims.application (sid,link) values (22,'http://instaresume.kunalvarma.in/saurandhridhavale_resume');
+insert into uims.application (sid,link) values (32,'http://instaresume.kunalvarma.in/kavuriupadhyay_resume');
+
+
+query="select s.sid,s.fname as firstname,s.lname as lastname,c.cname,s.email,s.mobile_no,s.city,r.rname as recruiter from uims.student s inner join uims.course c on s.cid=c.cid inner join uims.recruitements rs  on s.sid=rs.sid inner join uims.recruiter r on r.rid=rs.rid where r.rid="+rid+" ";
+
+query="select s.sid,s.fname as firstname,s.lname as lastname,c.cname,s.email,s.mobile_no,s.city from uims.student s inner join uims.course c on s.cid=c.cid inner join uims.application a on a.sid=s.sid";
+
+query="select s.sid,s.fname as firstname,s.lname as lastname,c.cname,s.email,s.mobile_no,s.city from uims.student s inner join uims.course c on c.cid=s.cid inner join uims.recruitements rs on rs.sid=s.sid where rs.rid="+rid+" ";
+
+query="select count(s.sid) from uims.student s inner join uims.recruitements rs on rs.sid=s.sid where rs.rid= "+rid+" ";
+
+query="select p.title,p.duration,p.guide from uims.project p where p.sid="+sid+" ";
+
+query="insert into uims.recruitements values ("+rid+","+sid+",'"+date+"',"+month+","+stipend+")";
+
+query="select avg(rs.stipend) from uims.recruitements rs inner join uims.student s on rs.sid=s.sid where exists(select s.sid from uims.student s where s.cid=(select s.cid from uims.course c where c.cname='"+course+"')) and s.year="+year+" ";
+
+query="select distinct rs.stipend,r.rname from uims.recruitements rs inner join uims.recruiter r on rs.rid=r.rid  where exists(select r.rid from uims.recruiter r) order by rs.stipend";
+
+query="select count(rs.rid),r.rname from uims.recruitements rs inner join uims.recruiter r on rs.rid=r.rid group by r.rname";
+
+query="select s.sid,s.fname as firstname,s.lname as lastname,c.cname,s.email,s.mobile_no,s.city from uims.student s inner join uims.course c on c.cid=s.cid where s.cid=(select c.cid from uims.course c where c.cname='"+course+"') and s.year="+year+" and exists(SELECT s.sid FROM uims.student s WHERE NOT EXISTS (select rs.sid from uims.recruitements rs where rs.sid=s.sid))";
+
+query="select s.sid,s.fname as firstname,s.lname as lastname,c.cname,s.email,s.mobile_no,s.city,r.rname as recruiter from uims.student s inner join uims.course c on c.cid=s.cid inner join uims.recruitements rs  on s.sid=rs.sid inner join uims.recruiter r on r.rid=rs.rid";
+
